@@ -50,7 +50,6 @@ class WikiScraperApp:
 
         print(paragraph)
         print()
-        # Minimal license note (we'll refine later if needed)
         print("Source: Bulbapedia (content may be under CC BY-NC-SA).")
         print(f"URL: {result.final_url}")
         return 0

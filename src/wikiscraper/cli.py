@@ -30,7 +30,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="Recursively count words on linked articles up to depth DEPTH.",
     )
 
-    # Options (some used later; keeping now to lock CLI contract early)
     parser.add_argument(
         "--first-row-is-header",
         action="store_true",

@@ -18,7 +18,6 @@ class PageFetcher:
         self.timeout = timeout
 
     def build_article_url(self, search_phrase: str) -> str:
-        # Bulbapedia uses underscores for spaces in titles
         title = search_phrase.strip().replace(" ", "_")
         title = urllib.parse.quote(title, safe=":_()'-,")
         return self.base_url + title
@@ -30,7 +29,6 @@ class PageFetcher:
             timeout=self.timeout,
             headers={"User-Agent": "WikiScraper/1.0 (Educational project)"},
         )
-        # Bulbapedia returns 404 for missing pages
         if resp.status_code == 404:
             raise FileNotFoundError(f"Article not found for phrase: {search_phrase}")
         resp.raise_for_status()
