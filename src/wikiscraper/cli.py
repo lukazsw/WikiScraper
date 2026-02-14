@@ -41,17 +41,12 @@ def build_parser() -> argparse.ArgumentParser:
         default="article",
         help="Sorting mode for relative frequency analysis.",
     )
+    parser.add_argument("--n", type=int, default=20, help="Number of top words to display in frequency analysis.")
+    parser.add_argument("--wait", type=float, default=0.0, help="Delay between requests in auto mode (seconds).")
     parser.add_argument(
-        "--n",
-        type=int,
-        default=20,
-        help="Number of top words to display in frequency analysis.",
+        "--html-file",
+        type=str,
+        default=None,
+        help="Optional path to a local HTML file (offline mode for testing).",
     )
-    parser.add_argument(
-        "--wait",
-        type=float,
-        default=0.0,
-        help="Delay between requests in auto mode (seconds).",
-    )
-
     return parser

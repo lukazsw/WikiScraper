@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import urllib.parse
 from dataclasses import dataclass
+from pathlib import Path
 
 import requests
 
@@ -33,3 +34,11 @@ class PageFetcher:
             raise FileNotFoundError(f"Article not found for phrase: {search_phrase}")
         resp.raise_for_status()
         return FetchResult(final_url=str(resp.url), html=resp.text)
+
+    def read_html_file(self, html_file: str) -> FetchResult:
+        path = Path(html_file)
+        if not path.exists():
+            raise FileNotFoundError(f"HTML file does not exist: {html_file}")
+        html = path.read_text(encoding="utf-8", errors="replace")
+        # final_url is unknown in offline mode; keep file path for debugging
+        return FetchResult(final_url=str(path.resolve()), html=html)
