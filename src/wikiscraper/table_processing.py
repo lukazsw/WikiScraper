@@ -66,14 +66,17 @@ def process_table(rows: list[list[str]], first_row_is_header: bool) -> Processed
 
     df = pd.DataFrame(data, index=row_headers, columns=col_headers)
 
-    # counts excluding headers: count only data cells, ignore empty strings
     flat = pd.Series(df.to_numpy().ravel())
     flat = flat[flat.notna()]
     flat = flat.astype(str).str.strip()
     flat = flat[flat != ""]
 
-    # OPTIONAL: if you want counts mainly for multipliers (for charts like Type chart),
-    # you can keep only cells that end with '×'. For now, keep everything.
+    # Auto-detect "multiplier chart" tables (like Type Chart):
+    # if most values look like e.g. '1×', '½×', '2×', '0×' -> count only those
+    is_multiplier = flat.str.fullmatch(r".*×")
+    if len(flat) > 0 and (is_multiplier.mean() >= 0.5):
+        flat = flat[is_multiplier]
+
     counts = flat.value_counts().reset_index()
     counts.columns = ["value", "count"]
 

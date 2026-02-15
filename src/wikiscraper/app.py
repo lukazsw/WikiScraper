@@ -7,6 +7,7 @@ from .parser import ArticleParser
 from .csv_writer import write_csv
 from .table_extractor import TableExtractor
 from .utils import sanitize_filename
+from .word_counting import tokenize, update_counts_file
 
 import pandas as pd
 
@@ -32,7 +33,7 @@ class WikiScraperApp:
             self._first_row_is_header = args.first_row_is_header
             return self._run_table(args.search_phrase, args.table, args.html_file)
         if args.count_words:
-            raise NotImplementedError("--count-words not implemented yet")
+            return self._run_count_words(args.search_phrase, args.html_file)
         if args.analyze_relative_word_frequency:
             raise NotImplementedError("--analyze-relative-word-frequency not implemented yet")
         if args.auto_count_words is not None:
@@ -104,4 +105,34 @@ class WikiScraperApp:
         # pandas-like printing
         with pd.option_context("display.max_rows", 50, "display.max_colwidth", 80):
             print(processed.counts_df)
+        return 0
+    
+    def _run_count_words(self, search_phrase: str, html_file: str | None) -> int:
+        try:
+            if html_file:
+                result = self.fetcher.read_html_file(html_file)
+            else:
+                result = self.fetcher.fetch_article_html(search_phrase)
+        except FileNotFoundError as e:
+            print(str(e))
+            return 2
+        except Exception as e:
+            print(f"Failed to fetch page: {e}")
+            return 3
+
+        try:
+            text = self.parser.extract_article_text(result.html)
+            tokens = tokenize(text)
+        except Exception as e:
+            print(f"Failed to extract/tokenize text: {e}")
+            return 4
+
+        counts_path = "word-counts.json"
+        try:
+            update_counts_file(counts_path, tokens)
+        except Exception as e:
+            print(f"Failed to update {counts_path}: {e}")
+            return 5
+
+        print(f"Updated {counts_path} with {len(tokens)} tokens from: {result.final_url}")
         return 0
