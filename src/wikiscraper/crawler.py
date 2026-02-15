@@ -21,7 +21,7 @@ class WikiCrawler:
         self.fetcher = fetcher
         self.parser = parser
 
-     def auto_count_words(self, start_title: str, max_depth: int, wait_s: float, max_pages: int, counts_path: str = "word-counts.json") -> CrawlStats:
+    def auto_count_words(self, start_title: str, max_depth: int, wait_s: float, max_pages: int, counts_path: str = "word-counts.json") -> CrawlStats:
         """
         Breadth-first traversal from start_title up to max_depth.
         Depth 0 => only start page.
