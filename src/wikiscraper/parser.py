@@ -36,3 +36,44 @@ class ArticleParser:
 
         text = content.get_text(" ", strip=True)
         return text
+    
+    def extract_article_links(self, html: str) -> list[str]:
+        """
+        Returns list of internal /wiki/... links (titles) from main content.
+        We filter out namespaces like File:, Category:, Special:, etc.
+        Output is page titles like 'Pikachu' or 'Type' (without '/wiki/').
+        """
+        soup = BeautifulSoup(html, "lxml")
+        content = soup.select_one("#mw-content-text")
+        if content is None:
+            return []
+
+        titles: list[str] = []
+        seen: set[str] = set()
+
+        for a in content.find_all("a", href=True):
+            href = a["href"]
+            if not href.startswith("/wiki/"):
+                continue
+
+            # strip fragment
+            href = href.split("#", 1)[0]
+            if href == "/wiki/" or href == "/wiki":
+                continue
+
+            title = href[len("/wiki/") :]
+
+            # filter namespaces like File:, Category:, Special:, etc.
+            if ":" in title:
+                continue
+
+            # avoid empty
+            title = title.strip()
+            if not title:
+                continue
+
+            if title not in seen:
+                seen.add(title)
+                titles.append(title)
+
+        return titles

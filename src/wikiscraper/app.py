@@ -10,6 +10,7 @@ from .utils import sanitize_filename
 from .word_counting import tokenize, update_counts_file
 from .relative_frequency import build_language_reference, compute_relative_freq, sort_relative_df
 from .word_counting import load_counts
+from .crawler import WikiCrawler
 
 import pandas as pd
 
@@ -27,6 +28,7 @@ class WikiScraperApp:
         self.fetcher = PageFetcher(self.config.base_url)
         self.parser = ArticleParser()
         self.table_extractor = TableExtractor()
+        self.crawler = WikiCrawler(self.fetcher, self.parser)
 
     def run(self, args) -> int:
         if args.summary:
@@ -39,7 +41,7 @@ class WikiScraperApp:
         if args.analyze_relative_word_frequency:
             return self._run_relative_freq(args.mode, args.n)
         if args.auto_count_words is not None:
-            raise NotImplementedError("--auto-count-words not implemented yet")
+            return self._run_auto_count_words(args.search_phrase, args.auto_count_words, args.wait)
         if args.chart:
             return self._run_relative_freq_chart(args.mode, args.n)
 
@@ -215,4 +217,21 @@ class WikiScraperApp:
         out = "relative_frequency.png"
         plt.savefig(out, dpi=150)
         print(f"Saved chart to: {out}")
+        return 0
+    
+    def _run_auto_count_words(self, search_phrase: str, depth: int, wait_s: float) -> int:
+        # NOTE: auto mode uses ONLINE crawling by design
+        try:
+            stats = self.crawler.auto_count_words(
+                start_title=search_phrase.strip().replace(" ", "_"),
+                max_depth=depth,
+                wait_s=wait_s,
+                counts_path="word-counts.json",
+            )
+        except Exception as e:
+            print(f"Auto count failed: {e}")
+            return 2
+
+        print()
+        print(f"Done. Visited pages: {stats.pages_visited}, unique pages: {stats.unique_pages}, tokens added: {stats.tokens_added}")
         return 0
