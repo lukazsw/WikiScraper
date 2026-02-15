@@ -45,7 +45,11 @@ class WikiCrawler:
             if pages_visited > 0 and wait_s > 0:
                 time.sleep(wait_s)
 
-            result = self.fetcher.fetch_article_html(title)
+            try:
+                result = self.fetcher.fetch_article_html(title)
+            except FileNotFoundError:
+                print(f"[skip] 404 title={title}")
+                continue
             pages_visited += 1
 
             text = self.parser.extract_article_text(result.html)

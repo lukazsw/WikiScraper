@@ -20,7 +20,7 @@ class PageFetcher:
 
     def build_article_url(self, search_phrase: str) -> str:
         title = search_phrase.strip().replace(" ", "_")
-        title = urllib.parse.quote(title, safe=":_()'-,")
+        title = urllib.parse.quote(title, safe=":/_()'-,")
         return self.base_url + title
 
     def fetch_article_html(self, search_phrase: str) -> FetchResult:

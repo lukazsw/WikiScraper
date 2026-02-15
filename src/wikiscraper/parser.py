@@ -62,6 +62,9 @@ class ArticleParser:
                 continue
 
             title = href[len("/wiki/") :]
+            # decode percent-encoding (e.g. Pok%C3%A9mon)
+            from urllib.parse import unquote
+            title = unquote(title)
 
             # filter namespaces like File:, Category:, Special:, etc.
             if ":" in title:
