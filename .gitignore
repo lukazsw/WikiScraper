@@ -1,19 +1,15 @@
-# Środowiska wirtualne
 .venv/
 venv/
 env/
 
-# Cache Pythona (uproszczone - łapie wszystko)
 **/__pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
 
-# Pliki danych i wyniki (Twoje specyficzne pliki)
 word-counts.json
 relative_frequency.png
 *.csv
 data/
 
-# Pliki systemowe
 .DS_Store
