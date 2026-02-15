@@ -29,6 +29,11 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="DEPTH",
         help="Recursively count words on linked articles up to depth DEPTH.",
     )
+    mode.add_argument(
+        "--chart",
+        action="store_true",
+        help="Generate a bar chart for relative word frequency analysis.",
+    )
 
     parser.add_argument(
         "--first-row-is-header",

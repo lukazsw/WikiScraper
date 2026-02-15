@@ -40,6 +40,8 @@ class WikiScraperApp:
             return self._run_relative_freq(args.mode, args.n)
         if args.auto_count_words is not None:
             raise NotImplementedError("--auto-count-words not implemented yet")
+        if args.chart:
+            return self._run_relative_freq_chart(args.mode, args.n)
 
         return 0
 
@@ -167,4 +169,50 @@ class WikiScraperApp:
             return 5
 
         print(out)
+        return 0
+    
+    def _run_relative_freq_chart(self, mode: str, n: int) -> int:
+        import matplotlib.pyplot as plt
+
+        counts_path = "word-counts.json"
+        try:
+            counts = load_counts(counts_path)
+        except Exception as e:
+            print(f"Failed to load {counts_path}: {e}")
+            return 2
+
+        if not counts:
+            print(f"{counts_path} is empty. Run --count-words first.")
+            return 3
+
+        try:
+            lang_ref = build_language_reference(lang="en", n=2000)
+            result = compute_relative_freq(counts, lang_ref, top_k=n)
+            df = sort_relative_df(result.df, mode=mode)
+        except Exception as e:
+            print(f"Failed to compute relative frequency: {e}")
+            return 4
+
+        df = df.copy()
+        df["freq_language"] = df["freq_language"].fillna(0.0)
+
+        words = df["word"].tolist()
+        fa = df["freq_article"].tolist()
+        fl = df["freq_language"].tolist()
+
+        x = list(range(len(words)))
+        w = 0.4
+
+        plt.figure()
+        plt.bar([i - w / 2 for i in x], fa, width=w, label="Article")
+        plt.bar([i + w / 2 for i in x], fl, width=w, label="Language")
+
+        plt.xticks(x, words, rotation=45, ha="right")
+        plt.title("Relative word frequency")
+        plt.legend()
+        plt.tight_layout()
+
+        out = "relative_frequency.png"
+        plt.savefig(out, dpi=150)
+        print(f"Saved chart to: {out}")
         return 0
