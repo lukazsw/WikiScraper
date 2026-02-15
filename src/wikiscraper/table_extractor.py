@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 @dataclass(frozen=True)
 class TableData:
-    rows: list[list[str]]  # each row: list of cell texts
+    rows: list[list[str]]
 
 
 class TableExtractor:

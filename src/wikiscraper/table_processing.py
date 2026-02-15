@@ -48,12 +48,10 @@ def process_table(rows: list[list[str]], first_row_is_header: bool) -> Processed
     if not body:
         raise ValueError("Table has no data rows after removing axis label rows.")
 
-    # first column = row headers
     row_headers = [r[0] for r in body]
     data = [r[1:] for r in body]
     data_width = len(data[0]) if data else 0
 
-    # columns
     if header_row is not None:
         col_headers = header_row[1 : 1 + data_width]
         if len(col_headers) < data_width:

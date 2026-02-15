@@ -28,8 +28,9 @@ def load_counts(path: str) -> Dict[str, int]:
     if not p.exists():
         return {}
     data = json.loads(p.read_text(encoding="utf-8"))
-    # be defensive
+
     out: Dict[str, int] = {}
+
     for k, v in data.items():
         if isinstance(k, str) and isinstance(v, int):
             out[k] = v

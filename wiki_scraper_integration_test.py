@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from src.wikiscraper.parser import ArticleParser
 
 from wiki_scraper import main
 
@@ -24,9 +25,7 @@ def run_test() -> int:
         print(f"CLI returned non-zero exit code: {code}")
         return 3
 
-    # Extra check: parse summary directly to validate content deterministically
-    # (keeps test robust even if CLI printing format changes a bit)
-    from src.wikiscraper.parser import ArticleParser
+
 
     html = html_path.read_text(encoding="utf-8", errors="replace")
     summary = ArticleParser().extract_first_paragraph(html)
