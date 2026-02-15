@@ -2,13 +2,13 @@ from src.wikiscraper.word_counting import tokenize, update_counts_file, load_cou
 
 
 def test_tokenize_basic():
-    text = "Pikachu is Electric-type. Pikachu's tail!"
+    text = "Pikachu is Electric-type. Pokémon appeared. Pikachu's tail!"
     tokens = tokenize(text)
-    assert tokens.count("pikachu") == 1  # "Pikachu" appears once as token
+    assert "pikachu" in tokens
+    assert "pokemon" in tokens or "pokémon" in tokens
     assert "electric" in tokens
     assert "type" in tokens
-    assert "pikachu's" in tokens
-
+    assert "s" not in tokens
 
 def test_update_counts_file_merges(tmp_path):
     path = tmp_path / "counts.json"

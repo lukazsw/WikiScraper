@@ -4,13 +4,23 @@ import json
 import re
 from pathlib import Path
 from typing import Dict
+import unicodedata
 
 
-_word_re = re.compile(r"[A-Za-z]+(?:'[A-Za-z]+)?")  # simple English-ish tokens
+_word_re = re.compile(r"[^\W\d_]+(?:'[^\W\d_]+)?", re.UNICODE)
+
+
+def _normalize(text: str) -> str:
+    # Normalize unicode to reduce weird splits
+    return unicodedata.normalize("NFKC", text)
 
 
 def tokenize(text: str) -> list[str]:
-    return [m.group(0).lower() for m in _word_re.finditer(text)]
+    text = _normalize(text)
+    toks = [m.group(0).lower() for m in _word_re.finditer(text)]
+    # drop 1-letter tokens like "s"
+    toks = [t for t in toks if len(t) >= 2]
+    return toks
 
 
 def load_counts(path: str) -> Dict[str, int]:

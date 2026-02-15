@@ -8,6 +8,8 @@ from .csv_writer import write_csv
 from .table_extractor import TableExtractor
 from .utils import sanitize_filename
 from .word_counting import tokenize, update_counts_file
+from .relative_frequency import build_language_reference, compute_relative_freq, sort_relative_df
+from .word_counting import load_counts
 
 import pandas as pd
 
@@ -35,7 +37,7 @@ class WikiScraperApp:
         if args.count_words:
             return self._run_count_words(args.search_phrase, args.html_file)
         if args.analyze_relative_word_frequency:
-            raise NotImplementedError("--analyze-relative-word-frequency not implemented yet")
+            return self._run_relative_freq(args.mode, args.n)
         if args.auto_count_words is not None:
             raise NotImplementedError("--auto-count-words not implemented yet")
 
@@ -135,4 +137,34 @@ class WikiScraperApp:
             return 5
 
         print(f"Updated {counts_path} with {len(tokens)} tokens from: {result.final_url}")
+        return 0
+    
+    def _run_relative_freq(self, mode: str, n: int) -> int:
+        # Use cumulative word-counts.json (as in PDF workflow)
+        counts_path = "word-counts.json"
+        try:
+            counts = load_counts(counts_path)
+        except Exception as e:
+            print(f"Failed to load {counts_path}: {e}")
+            return 2
+
+        if not counts:
+            print(f"{counts_path} is empty. Run --count-words first.")
+            return 3
+
+        # Bulbapedia is English
+        try:
+            lang_ref = build_language_reference(lang="en", n=2000)
+        except Exception as e:
+            print(f"Failed to build language reference: {e}")
+            return 4
+
+        try:
+            result = compute_relative_freq(counts, lang_ref, top_k=n)
+            out = sort_relative_df(result.df, mode=mode)
+        except Exception as e:
+            print(f"Failed to compute relative frequency: {e}")
+            return 5
+
+        print(out)
         return 0
