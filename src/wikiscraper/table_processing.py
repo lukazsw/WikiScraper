@@ -38,9 +38,6 @@ def process_table(rows: list[list[str]], first_row_is_header: bool) -> Processed
     if not body:
         raise ValueError("Table has no data rows after removing header row.")
 
-    # Drop rows that look like "axis labels" (common in charts):
-    # Example: first cell is something like "Attacking type" and the rest are mostly non-multipliers.
-    # Keep it conservative: only drop if it clearly isn't data.
     def is_axis_label_row(r: list[str]) -> bool:
         first = (r[0] or "").strip().lower()
         if first in {"attacking type", "defending type", "attack", "defense"}:

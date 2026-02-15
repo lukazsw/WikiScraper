@@ -8,7 +8,7 @@ from wordfreq import top_n_list, zipf_frequency
 
 @dataclass(frozen=True)
 class RelativeFreqResult:
-    df: pd.DataFrame  # columns: word, freq_article, freq_language
+    df: pd.DataFrame
 
 
 def build_language_reference(lang: str, n: int = 2000) -> dict[str, float]:

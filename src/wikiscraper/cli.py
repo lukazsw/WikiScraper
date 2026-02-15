@@ -8,12 +8,10 @@ def build_parser() -> argparse.ArgumentParser:
         prog="wiki_scraper",
         description="WikiScraper - CLI tool for scraping Bulbapedia pages.",
     )
-
     parser.add_argument(
         "search_phrase",
         help="Search phrase used to find the wiki article (quotes recommended).",
     )
-
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--summary", action="store_true", help="Print first paragraph summary.")
     mode.add_argument("--table", type=int, help="Extract N-th table and save as CSV.")
@@ -34,7 +32,6 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Generate a bar chart for relative word frequency analysis.",
     )
-
     parser.add_argument(
         "--first-row-is-header",
         action="store_true",
