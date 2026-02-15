@@ -22,6 +22,7 @@ def process_table(rows: list[list[str]], first_row_is_header: bool) -> Processed
     - first column = row headers
     - if first_row_is_header: first row = column headers
     We compute value counts excluding headers (row headers and optional column headers).
+    Additionally, we try to drop "axis label" rows like 'Attacking type' that are not real data rows.
     """
     padded = _pad_rows(rows, pad="")
 
@@ -37,6 +38,19 @@ def process_table(rows: list[list[str]], first_row_is_header: bool) -> Processed
     if not body:
         raise ValueError("Table has no data rows after removing header row.")
 
+    # Drop rows that look like "axis labels" (common in charts):
+    # Example: first cell is something like "Attacking type" and the rest are mostly non-multipliers.
+    # Keep it conservative: only drop if it clearly isn't data.
+    def is_axis_label_row(r: list[str]) -> bool:
+        first = (r[0] or "").strip().lower()
+        if first in {"attacking type", "defending type", "attack", "defense"}:
+            return True
+        return False
+
+    body = [r for r in body if not is_axis_label_row(r)]
+    if not body:
+        raise ValueError("Table has no data rows after removing axis label rows.")
+
     # first column = row headers
     row_headers = [r[0] for r in body]
     data = [r[1:] for r in body]
@@ -45,7 +59,6 @@ def process_table(rows: list[list[str]], first_row_is_header: bool) -> Processed
     # columns
     if header_row is not None:
         col_headers = header_row[1 : 1 + data_width]
-        # if header row is shorter, pad column names
         if len(col_headers) < data_width:
             col_headers = col_headers + [f"col_{i+1}" for i in range(len(col_headers), data_width)]
     else:
@@ -53,10 +66,14 @@ def process_table(rows: list[list[str]], first_row_is_header: bool) -> Processed
 
     df = pd.DataFrame(data, index=row_headers, columns=col_headers)
 
-    # counts excluding headers: we count only data cells (df.values), ignore empty strings
+    # counts excluding headers: count only data cells, ignore empty strings
     flat = pd.Series(df.to_numpy().ravel())
     flat = flat[flat.notna()]
-    flat = flat[flat.astype(str).str.strip() != ""]
+    flat = flat.astype(str).str.strip()
+    flat = flat[flat != ""]
+
+    # OPTIONAL: if you want counts mainly for multipliers (for charts like Type chart),
+    # you can keep only cells that end with '×'. For now, keep everything.
     counts = flat.value_counts().reset_index()
     counts.columns = ["value", "count"]
 
