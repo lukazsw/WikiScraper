@@ -8,6 +8,10 @@ from .csv_writer import write_csv
 from .table_extractor import TableExtractor
 from .utils import sanitize_filename
 
+import pandas as pd
+
+from .table_processing import dataframe_to_csv_rows, process_table
+
 
 @dataclass(frozen=True)
 class Config:
@@ -25,6 +29,7 @@ class WikiScraperApp:
         if args.summary:
             return self._run_summary(args.search_phrase, args.html_file)
         if args.table is not None:
+            self._first_row_is_header = args.first_row_is_header
             return self._run_table(args.search_phrase, args.table, args.html_file)
         if args.count_words:
             raise NotImplementedError("--count-words not implemented yet")
@@ -79,12 +84,24 @@ class WikiScraperApp:
             print(f"Failed to extract table: {e}")
             return 4
 
-        filename = f"{sanitize_filename(search_phrase)}.csv"
         try:
-            write_csv(filename, table.rows)
+            processed = process_table(table.rows, first_row_is_header=getattr(self, "_first_row_is_header", False))
         except Exception as e:
-            print(f"Failed to write CSV: {e}")
+            print(f"Failed to process table: {e}")
             return 5
 
+        filename = f"{sanitize_filename(search_phrase)}.csv"
+        try:
+            csv_df = dataframe_to_csv_rows(processed.df)
+            csv_df.to_csv(filename, index=False)
+        except Exception as e:
+            print(f"Failed to write CSV: {e}")
+            return 6
+
         print(f"Saved table {table_number} to: {filename}")
+        print()
+        print("Value counts (excluding headers):")
+        # pandas-like printing
+        with pd.option_context("display.max_rows", 50, "display.max_colwidth", 80):
+            print(processed.counts_df)
         return 0
