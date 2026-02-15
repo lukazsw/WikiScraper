@@ -21,12 +21,14 @@ class WikiCrawler:
         self.fetcher = fetcher
         self.parser = parser
 
-    def auto_count_words(self, start_title: str, max_depth: int, wait_s: float, counts_path: str = "word-counts.json") -> CrawlStats:
+     def auto_count_words(self, start_title: str, max_depth: int, wait_s: float, max_pages: int, counts_path: str = "word-counts.json") -> CrawlStats:
         """
         Breadth-first traversal from start_title up to max_depth.
         Depth 0 => only start page.
         Uses visited set to avoid duplicates.
         """
+        if max_pages < 1:
+            raise ValueError("--max-pages must be >= 1")
         if max_depth < 0:
             raise ValueError("DEPTH must be >= 0")
 
@@ -36,6 +38,8 @@ class WikiCrawler:
         tokens_added = 0
 
         while q:
+            if pages_visited >= max_pages:
+                break
             title, depth = q.popleft()
             if title in visited:
                 continue

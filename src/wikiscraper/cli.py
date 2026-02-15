@@ -54,4 +54,10 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional path to a local HTML file (offline mode for testing).",
     )
+    parser.add_argument(
+        "--max-pages",
+        type=int,
+        default=200,
+        help="Maximum number of pages to visit in --auto-count-words.",
+    )
     return parser

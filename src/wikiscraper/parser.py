@@ -70,9 +70,12 @@ class ArticleParser:
             if ":" in title:
                 continue
 
-            # avoid empty
             title = title.strip()
             if not title:
+                continue
+
+            low = title.lower()
+            if low.startswith("list_of_"):
                 continue
 
             if title not in seen:

@@ -41,7 +41,7 @@ class WikiScraperApp:
         if args.analyze_relative_word_frequency:
             return self._run_relative_freq(args.mode, args.n)
         if args.auto_count_words is not None:
-            return self._run_auto_count_words(args.search_phrase, args.auto_count_words, args.wait)
+            return self._run_auto_count_words(args.search_phrase, args.auto_count_words, args.wait, args.max_pages)
         if args.chart:
             return self._run_relative_freq_chart(args.mode, args.n)
 
@@ -219,13 +219,13 @@ class WikiScraperApp:
         print(f"Saved chart to: {out}")
         return 0
     
-    def _run_auto_count_words(self, search_phrase: str, depth: int, wait_s: float) -> int:
-        # NOTE: auto mode uses ONLINE crawling by design
+    def _run_auto_count_words(self, search_phrase: str, depth: int, wait_s: float, max_pages: int) -> int:
         try:
             stats = self.crawler.auto_count_words(
                 start_title=search_phrase.strip().replace(" ", "_"),
                 max_depth=depth,
                 wait_s=wait_s,
+                max_pages=max_pages,
                 counts_path="word-counts.json",
             )
         except Exception as e:
